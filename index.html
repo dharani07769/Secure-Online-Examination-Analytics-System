@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional Placement Portal - Dharani</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/dist/css/all.min.css">
+    <style>
+        .cert-bg { background: #fffdf5; border: 12px double #b8860b; font-family: 'Times New Roman', serif; position: relative; }
+        .watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg); font-size: 100px; color: rgba(0,0,0,0.03); pointer-events: none; z-index: 0; }
+    </style>
+</head>
+<body class="bg-slate-50 font-sans text-gray-800">
+    <div id="login-screen" class="fixed inset-0 bg-slate-900 flex items-center justify-center z-[100]">
+        <div class="bg-white p-10 rounded-3xl shadow-2xl w-96 text-center border-t-8 border-blue-600">
+            <h2 class="text-3xl font-bold mb-6 text-gray-800">Student Login</h2>
+            <input type="text" id="student-name" placeholder="Enter Full Name" class="w-full p-4 border rounded-xl mb-6 text-center outline-none focus:ring-2 focus:ring-blue-500">
+            <button onclick="login()" class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold hover:bg-blue-700 transition-all uppercase">Enter Portal</button>
+        </div>
+    </div>
+
+    <div id="main-portal" class="hidden">
+        <header class="bg-white border-b py-4 px-10 flex justify-between items-center sticky top-0 z-50 shadow-md">
+            <h1 class="text-xl font-black text-blue-700 uppercase italic">Smart Placement Portal</h1>
+            <div class="flex items-center space-x-6">
+                <div id="timer-box" class="hidden bg-red-600 text-white px-4 py-2 rounded-lg font-bold"><span id="timer">15:00</span></div>
+                <span class="font-bold text-gray-700">Student: <span id="user-display" class="text-blue-600"></span></span>
+                <button onclick="logout()" class="text-sm bg-gray-200 px-3 py-1 rounded hover:bg-red-100 transition text-red-600 font-bold">LOGOUT</button>
+            </div>
+        </header>
+
+        <div class="container mx-auto px-4 py-10 space-y-10 max-w-5xl">
+            <section id="company-section" class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+                <h2 class="text-2xl font-bold mb-8 text-center text-gray-800">Select Company to View Prep & Take Test</h2>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <button onclick="showPrep('ZOHO')" class="p-6 border-2 border-blue-100 rounded-2xl hover:bg-blue-50 transition text-center">
+                        <img src="https://logo.clearbit.com/zoho.com" class="w-12 mx-auto mb-2" alt="">
+                        <span class="font-bold">ZOHO</span>
+                    </button>
+                    <button onclick="showPrep('TCS')" class="p-6 border-2 border-red-100 rounded-2xl hover:bg-red-50 transition text-center">
+                        <img src="https://logo.clearbit.com/tcs.com" class="w-12 mx-auto mb-2" alt="">
+                        <span class="font-bold">TCS</span>
+                    </button>
+                    <button onclick="showPrep('AMAZON')" class="p-6 border-2 border-yellow-100 rounded-2xl hover:bg-yellow-50 transition text-center">
+                        <img src="https://logo.clearbit.com/amazon.com" class="w-12 mx-auto mb-2" alt="">
+                        <span class="font-bold">AMAZON</span>
+                    </button>
+                    <button onclick="showPrep('INFOSYS')" class="p-6 border-2 border-indigo-100 rounded-2xl hover:bg-indigo-50 transition text-center">
+                        <img src="https://logo.clearbit.com/infosys.com" class="w-12 mx-auto mb-2" alt="">
+                        <span class="font-bold">INFOSYS</span>
+                    </button>
+                </div>
+            </section>
+
+            <div id="prep-details" class="hidden bg-white p-8 rounded-2xl shadow-sm border-l-8 border-blue-600">
+                <div class="flex justify-between items-start mb-6">
+                    <h2 id="prep-title" class="text-3xl font-bold text-gray-800"></h2>
+                    <button onclick="startTestActual()" class="bg-green-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-green-700 shadow-lg">START TEST NOW</button>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="bg-blue-50 p-6 rounded-xl">
+                        <h3 class="font-bold text-blue-800 mb-3"><i class="fas fa-lightbulb mr-2"></i>Preparation Guide</h3>
+                        <ul id="prep-guide-list" class="list-disc ml-5 space-y-2 text-gray-700"></ul>
+                    </div>
+                    <div class="bg-orange-50 p-6 rounded-xl">
+                        <h3 class="font-bold text-orange-800 mb-3"><i class="fas fa-user-tie mr-2"></i>Interview Experience</h3>
+                        <p id="interview-exp-text" class="italic text-gray-700"></p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="test-area" class="hidden space-y-10">
+                <div class="bg-slate-800 p-4 rounded-xl text-center text-white font-bold text-xl uppercase" id="active-comp-name"></div>
+                <section class="bg-white p-8 rounded-2xl shadow-sm"><h2 class="text-xl font-bold mb-8 text-blue-600 border-b pb-2 italic text-center underline">SECTION A: APTITUDE</h2><div id="apt-container" class="space-y-6"></div></section>
+                <section class="bg-white p-8 rounded-2xl shadow-sm"><h2 class="text-xl font-bold mb-8 text-green-600 border-b pb-2 italic text-center underline">SECTION B: CODING</h2><div id="code-container" class="space-y-6"></div><button onclick="finishTest()" class="w-full mt-10 bg-slate-900 text-white py-5 rounded-2xl font-bold text-xl hover:bg-black transition-all">SUBMIT FINAL ASSESSMENT</button></section>
+            </div>
+            <section id="ai-section" class="hidden space-y-10">
+                <div class="bg-white p-10 rounded-3xl shadow-2xl text-center border-t-8 border-indigo-600">
+                    <h2 class="text-3xl font-bold text-indigo-700 mb-6">AI Performance Analysis</h2>
+                    <div class="max-w-md mx-auto mb-8"><canvas id="progressChart"></canvas></div>
+                    <p id="ai-feedback" class="text-xl mb-8 bg-indigo-50 p-6 rounded-xl font-semibold text-indigo-900"></p>
+                    <button onclick="displayOriginalCert()" class="bg-amber-600 text-white px-10 py-4 rounded-xl font-bold text-lg hover:bg-amber-700 shadow-xl transition-all">VIEW ORIGINAL CERTIFICATE</button>
+                </div>
+
+                <div id="cert-viewer" class="hidden p-4 md:p-10 overflow-x-auto">
+                    <div id="certificate-display" class="cert-bg mx-auto max-w-4xl p-12 text-center shadow-2xl min-w-[800px]">
+                        <div class="watermark">ORIGINAL</div>
+                        <h3 class="text-4xl font-bold text-slate-800 border-b-4 border-amber-600 inline-block pb-2 mb-2">SMART PLACEMENT ACADEMY</h3>
+                        <p class="italic text-gray-600 text-lg mb-10 tracking-widest uppercase">Official Verification of Technical Excellence</p>
+                        <p class="text-xl text-gray-700 mb-4">This is to certify that</p>
+                        <h2 id="cert-user-name" class="text-6xl font-extrabold text-amber-800 my-8 drop-shadow-sm uppercase"></h2>
+                        <p class="text-xl text-gray-700 mb-6">has successfully cleared the recruitment assessment for</p>
+                        <h4 id="cert-company-name" class="text-4xl font-bold text-slate-700 mb-10 uppercase"></h4>
+                        <div class="flex justify-between mt-20 px-12">
+                            <div class="text-center"><div class="w-40 h-0.5 bg-slate-800 mb-2"></div><p class="font-bold text-slate-800">Controller</p></div>
+                            <div class="flex items-center justify-center"><div class="w-24 h-24 border-4 border-amber-700 rounded-full flex items-center justify-center text-amber-700 font-bold text-[8px] text-center uppercase p-1">Verified <br> 2026</div></div>
+                            <div class="text-center"><div class="w-40 h-0.5 bg-slate-800 mb-2"></div><p class="font-bold text-slate-800">Director</p></div>
+                        </div>
+                    </div>
+                    <div class="text-center mt-8">
+                        <button onclick="window.print()" class="bg-gray-800 text-white px-8 py-3 rounded-lg font-bold shadow-lg">Print / Save as PDF</button>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        const companyInfo = {
+            'ZOHO': { prep: ["C Programming basics", "Logical Puzzles", "Arrays and Strings"], exp: "Focus on logic. Handwritten coding round was there." },
+            'TCS': { prep: ["NQT mock tests", "Quantitative Aptitude", "Verbal"], exp: "Friendly interview, focused on project and basics." },
+            'AMAZON': { prep: ["DS (Trees, Graphs)", "LeetCode Medium", "Leadership Principles"], exp: "Intense coding rounds. Behavioral questions matter." },
+            'INFOSYS': { prep: ["OOPs concepts", "DBMS and SQL", "Logical Reasoning"], exp: "Technical round was about project and DBMS." }
+        };
+
+        const questionsDB = {
+            'ZOHO': {
+                apt: [{q:"3x-5=10, x=?",opt:["3","4","5","6"],ans:2},{q:"15% of 200?",opt:["20","30","40","50"],ans:1},{q:"Sq.root 144?",opt:["10","11","12","13"],ans:2},{q:"2,6,12,20,?",opt:["28","30","32","34"],ans:1},{q:"Avg 2,4,6,8,10?",opt:["5","6","7","4"],ans:1}],
+                code: [{q:"LIFO Structure?",opt:["Queue","Stack","Array","Tree"],ans:1},{q:"Binary Search?",opt:["O(n)","O(log n)","O(n^2)","O(1)"],ans:1},{q:"HTML tag for Image?",opt:["<pic>","<img>","<src>","<image>"],ans:1},{q:"Python keyword?",opt:["func","function","def","method"],ans:2},{q:"SQL meaning?",opt:["Simple","Structured","Soft","None"],ans:1}]
+            }
+        };
+
+        let userName = "", selectedComp = "", timeLeft = 900, timerInterval, aptScore = 0, codeScore = 0;
+
+        function login() {
+            userName = document.getElementById('student-name').value;
+            if(!userName) return alert("Please enter your name!");
+            localStorage.setItem('dharaniPortalUser', userName);
+            showPortal(userName);
+        }
+
+        function showPortal(name) {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('main-portal').classList.remove('hidden');
+            document.getElementById('user-display').innerText = name;
+        }
+
+        window.onload = function() {
+            const savedUser = localStorage.getItem('dharaniPortalUser');
+            if(savedUser) { userName = savedUser; showPortal(userName); }
+        }
+
+        function logout() { localStorage.removeItem('dharaniPortalUser'); location.reload(); }
+
+        function showPrep(comp) {
+            selectedComp = comp;
+            document.getElementById('prep-details').classList.remove('hidden');
+            document.getElementById('prep-title').innerText = comp + " Preparation";
+            document.getElementById('prep-guide-list').innerHTML = companyInfo[comp].prep.map(p => `<li>${p}</li>`).join('');
+            document.getElementById('interview-exp-text').innerText = companyInfo[comp].exp;
+        }
+
+        function startTestActual() {
+            document.getElementById('test-area').classList.remove('hidden');
+            document.getElementById('timer-box').classList.remove('hidden');
+            document.getElementById('company-section').classList.add('hidden');
+            document.getElementById('prep-details').classList.add('hidden');
+            document.getElementById('active-comp-name').innerText = selectedComp;
+            
+            const render = (cid, qList, prefix) => {
+                document.getElementById(cid).innerHTML = qList.map((q, i) => `
+                    <div class="p-4 bg-gray-50 border rounded-xl mb-4">
+                        <p class="font-bold">${i+1}. ${q.q}</p>
+                        ${q.opt.map((o, idx) => `<label class="block cursor-pointer hover:text-blue-600"><input type="radio" name="${prefix}${i}" value="${idx}" class="mr-2"> ${o}</label>`).join('')}
+                    </div>
+                `).join('');
+            };
+            render('apt-container', questionsDB['ZOHO'].apt, 'apt');
+            render('code-container', questionsDB['ZOHO'].code, 'code');
+            startTimer();
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                let m = Math.floor(timeLeft / 60), s = timeLeft % 60;
+                document.getElementById('timer').innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
+                if(timeLeft-- <= 0) finishTest();
+            }, 1000);
+        }
+
+        function finishTest() {
+            clearInterval(timerInterval);
+            aptScore = 0; codeScore = 0;
+            const data = questionsDB['ZOHO'];
+            
+            data.apt.forEach((q, i) => { if(document.querySelector(`input[name="apt${i}"]:checked`)?.value == q.ans) aptScore++; });
+            data.code.forEach((q, i) => { if(document.querySelector(`input[name="code${i}"]:checked`)?.value == q.ans) codeScore++; });
+
+            document.getElementById('test-area').classList.add('hidden');
+            document.getElementById('ai-section').classList.remove('hidden');
+
+            let feedback = "";
+            let total = aptScore + codeScore;
+            
+            if(total >= 8) feedback = "🚀 Excellent! Your logic and coding skills are outstanding. You are ready for " + selectedComp + "!";
+            else if(aptScore < 3) feedback = "💡 Good coding, but you need more practice in Aptitude. Solve 10 problems daily.";
+            else if(codeScore < 3) feedback = "💻 Great Aptitude! But you need to focus more on Coding Logic. Re-learn Arrays and Strings.";
+            else feedback = "📚 Good effort! Review the key concepts again to increase your speed and accuracy.";
+
+            document.getElementById('ai-feedback').innerText = feedback;
+
+            new Chart(document.getElementById('progressChart'), {
+                type: 'doughnut', 
+                data: { labels: ['Aptitude', 'Coding'], datasets: [{ data: [aptScore, codeScore], backgroundColor: ['#2563eb', '#16a34a'] }] }
+            });
+        }
+
+        function displayOriginalCert() {
+            document.getElementById('cert-viewer').classList.remove('hidden');
+            document.getElementById('cert-user-name').innerText = userName;
+            document.getElementById('cert-company-name').innerText = selectedComp;
+            window.scrollTo(0, document.body.scrollHeight);
+        }
+    </script>
+</body>
+</html>
